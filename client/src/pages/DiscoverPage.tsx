@@ -47,17 +47,17 @@ export const DiscoverPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8 pb-16">
       {/* Header Banner */}
-      <div className="p-8 sm:p-12 rounded-4xl bg-gradient-to-r from-dramify-surface via-dramify-card to-dramify-surface border border-white/10 relative overflow-hidden">
+      <div className="p-6 sm:p-10 rounded-3xl bg-[#101217] border border-white/10 relative overflow-hidden">
         <div className="max-w-2xl space-y-3 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-crimson/15 text-rose-300 border border-crimson/25">
             <Compass size={13} />
             <span>Curated Korean Catalogue</span>
           </div>
-          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-white">
+          <h1 className="font-display font-extrabold text-2xl sm:text-4xl text-white">
             Discover Your Next Obsession
           </h1>
-          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-            Explore curated collections of iconic Korean dramas, high-octane thrillers, and award-winning cinema.
+          <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+            Explore collections of iconic Korean dramas, high-octane noir thrillers, and award-winning cinema.
           </p>
         </div>
       </div>

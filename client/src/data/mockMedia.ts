@@ -48,24 +48,24 @@ export const MOCK_REVIEWS: Review[] = [
   },
 ];
 
-// User Profile showcasing the 147 Watched Titles
+// User Profile showcasing the 148 Watched Titles
 export const MOCK_USER_PROFILE: UserProfile = {
   username: 'vivek',
   displayName: 'Vivek',
-  avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
-  bio: 'True Hallyu devotee. 147 Korean titles tracked across KBS weekend family gems, adrenaline noir thrillers, and box office cinema. Ma Dong-seok & Kim Woo-bin fan.',
+  avatarUrl: '/avatars/avatar-1.jpg',
+  bio: 'True Hallyu devotee. 148 Korean titles tracked across KBS weekend family gems, adrenaline noir thrillers, and box office cinema. Big Mouth, Jirisan & Bloodhounds enthusiast.',
   joinDate: 'January 2024',
   stats: {
-    watched: USER_WATCHED_TITLES.length, // Exactly 147!
+    watched: USER_WATCHED_TITLES.length, // Exactly 148!
     favorites: 32,
     watching: 4,
     planToWatch: 18,
     avgRating: 8.9,
   },
   topThreeDramas: [
-    USER_WATCHED_TITLES.find((m) => m.title === 'Uncontrollably Fond') || USER_WATCHED_TITLES[0],
-    USER_WATCHED_TITLES.find((m) => m.title === 'Descendants of the Sun') || USER_WATCHED_TITLES[27],
-    USER_WATCHED_TITLES.find((m) => m.title === 'Weak Hero Class 1') || USER_WATCHED_TITLES[57],
+    USER_WATCHED_TITLES.find((m) => m.title === 'Big Mouth') || USER_WATCHED_TITLES[54],
+    USER_WATCHED_TITLES.find((m) => m.title === 'Jirisan') || USER_WATCHED_TITLES[46],
+    USER_WATCHED_TITLES.find((m) => m.title === 'Bloodhounds') || USER_WATCHED_TITLES[130],
   ],
   topThreeMovies: [
     USER_WATCHED_TITLES.find((m) => m.title === 'Oldboy') || USER_WATCHED_TITLES[47],
