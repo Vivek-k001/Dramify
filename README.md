@@ -4,16 +4,19 @@
 ### *The Premium Social Tracking & Discovery Platform for Korean Drama & Cinema*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-rose.svg?style=for-the-badge)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live_App-dramify--olive.vercel.app-rose.svg?style=for-the-badge&logo=vercel)](https://dramify-olive.vercel.app/)
+[![Render API](https://img.shields.io/badge/Backend_API-Render_Live-46E3B7.svg?style=for-the-badge&logo=render)](https://dramify-server.onrender.com/api/health)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Node.js](https://img.shields.io/badge/Node.js-22-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4.21-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![TMDB API](https://img.shields.io/badge/TMDB-API_v3-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org/)
 
 <p align="center">
   A bespoke, cinema-grade web platform engineered specifically for Hallyu fans, K-Drama bingers, and Korean movie connoisseurs. Dramify combines social tracking, dual rating comparison, personalized top-tier podiums, and curated discovery in an Obsidian Cinema design language.
+</p>
+
+<p align="center">
+  🚀 <strong>Live Production Deployment</strong>: <a href="https://dramify-olive.vercel.app">https://dramify-olive.vercel.app</a>
 </p>
 
 </div>
@@ -22,10 +25,10 @@
 
 ## 🎬 Cinematic Motion Graphics Video & Teaser
 
-Experience the Dramify Obsidian Cinema design language, 147 Korean titles library, sliding pill navigation, and dual critic rating HUD in our motion graphics promotional video:
+Experience the Dramify Obsidian Cinema design language, 148 Korean titles library, sliding pill navigation, and dual critic rating HUD in our motion graphics promotional video:
 
 - 📥 **Direct Video Download**: [`docs/videos/dramify_promo.mp4`](./docs/videos/dramify_promo.mp4) *(1080p Full HD @ 30fps with synthesized cinematic soundtrack)*
-- 🌐 **Interactive In-App Studio**: Visit `/promo` inside the Dramify web app for real-time 60fps playback, scene jumping, audio controls, and 1-click video recording/export.
+- 🌐 **Interactive In-App Studio**: Visit [`/promo`](https://dramify-olive.vercel.app/promo) inside the Dramify web app for real-time 60fps playback, scene jumping, audio controls, and 1-click video recording/export.
 - ⚡ **Video Generator Script**: Run `python scripts/generate_promo_video.py` anytime to re-render the promo video offline.
 
 ---
@@ -42,7 +45,7 @@ Experience the Dramify Obsidian Cinema design language, 147 Korean titles librar
 ---
 
 ### 2. Devotee Profile & Sliding Pill Navigation
-> Personal profile showcasing 147 cataloged Korean titles with a responsive sliding pill navbar to seamlessly toggle between **K-Dramas (83)** and **K-Movies (64)**, accompanied by a dynamic Top 3 podium.
+> Personal profile showcasing 148 cataloged Korean titles with a responsive sliding pill navbar to seamlessly toggle between **K-Dramas (81)** and **K-Movies (67)**, accompanied by a dynamic Top 3 podium.
 
 <div align="center">
   <img src="./docs/screenshots/profile.png" alt="Dramify Profile and Sliding Pill Navbar" width="100%" />
@@ -63,14 +66,14 @@ Experience the Dramify Obsidian Cinema design language, 147 Korean titles librar
 
 ### 🎚️ Interactive Sliding Pill View Toggle
 - Effortlessly slide between **📺 K-Dramas** and **🎬 K-Movies** in your profile with a fluid, glowing indicator.
-- Real-time filtered grid featuring custom search by English or Hangul title, and 4-way sorting (*List Order #1–#147, Highest Rated, Release Year, and Alphabetical*).
+- Real-time filtered grid featuring custom search by English or Hangul title, and 4-way sorting (*List Order #1–#148, Highest Rated, Release Year, and Alphabetical*).
 
 ### 🏆 Dynamic Top 3 Podium
 - Interactive personal podium displaying 🥇 Gold, 🥈 Silver, and 🥉 Bronze favorites.
 - Automatically switches between your highest-rated **K-Dramas** and **K-Movies** when toggling the sliding pill.
 
-### 📚 147 Watched Titles Library
-- Deeply cataloged library of 147 iconic Korean titles (83 dramas and 64 movies) including English names, authentic Hangul typography, release years, and genres.
+### 📚 148 Watched Titles Library
+- Deeply cataloged library of 148 iconic Korean titles (81 dramas and 67 movies) including English names, authentic Hangul typography, release years, and genres.
 - Full tracking states: *Watching*, *Watched*, *Plan to Watch*, and *Favorites*.
 
 ### 🖼️ Resilient Fallback Poster System
