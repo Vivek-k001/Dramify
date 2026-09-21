@@ -20,6 +20,16 @@
 
 ---
 
+## 🎬 Cinematic Motion Graphics Video & Teaser
+
+Experience the Dramify Obsidian Cinema design language, 147 Korean titles library, sliding pill navigation, and dual critic rating HUD in our motion graphics promotional video:
+
+- 📥 **Direct Video Download**: [`docs/videos/dramify_promo.mp4`](./docs/videos/dramify_promo.mp4) *(1080p Full HD @ 30fps with synthesized cinematic soundtrack)*
+- 🌐 **Interactive In-App Studio**: Visit `/promo` inside the Dramify web app for real-time 60fps playback, scene jumping, audio controls, and 1-click video recording/export.
+- ⚡ **Video Generator Script**: Run `python scripts/generate_promo_video.py` anytime to re-render the promo video offline.
+
+---
+
 ## 🖼️ Application Showcase
 
 ### 1. Home & Cinematic Spotlight

@@ -8,6 +8,7 @@ import { MediaDetailPage } from './pages/MediaDetailPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
+import { PromoPage } from './pages/PromoPage';
 
 export const App: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ export const App: React.FC = () => {
           <Route index element={<HomePage />} />
           <Route path="discover" element={<DiscoverPage />} />
           <Route path="search" element={<SearchPage />} />
+          <Route path="promo" element={<PromoPage />} />
           <Route path="media/:type/:id" element={<MediaDetailPage />} />
           <Route path="library" element={<LibraryPage />} />
           <Route path="profile" element={<ProfilePage />} />

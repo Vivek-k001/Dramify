@@ -21,6 +21,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { to: '/', label: 'Home', icon: <Film size={15} /> },
     { to: '/discover', label: 'Discover', icon: <Compass size={15} /> },
+    { to: '/promo', label: 'Teaser', icon: <Sparkles size={15} /> },
     { to: '/search', label: 'Search', icon: <Search size={15} /> },
     { to: '/library', label: 'My Library', icon: <Bookmark size={15} /> },
   ];
@@ -67,8 +68,18 @@ export const Navbar: React.FC = () => {
             })}
           </div>
 
-          {/* Right Actions: Quick Search + User Profile CTA */}
+          {/* Right Actions: Quick Search + Promo Teaser + User Profile CTA */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Promo Teaser Badge */}
+            <Link
+              to="/promo"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-semibold transition-all group"
+              title="Watch Motion Graphics Teaser"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+              <span>🎬 Teaser</span>
+            </Link>
+
             {/* Quick Search Button */}
             <Link
               to="/search"

@@ -31,3 +31,7 @@ Thumbs.db
 # Internal agent metadata
 .agents/
 skills-lock.json
+
+# Generated video files (large binaries - use releases or external storage)
+docs/videos/
+client/public/videos/
