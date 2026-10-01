@@ -1,23 +1,46 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Flame, Award, Heart, Sparkles, ArrowRight, Play, Star } from 'lucide-react';
+import { Search, Flame, Award, Heart, Sparkles, ArrowRight, Play, Star, Shuffle } from 'lucide-react';
 import { MOCK_MEDIA, MOCK_REVIEWS } from '../data/mockMedia';
+import { MediaItem } from '../types/media';
 import { MediaCard } from '../components/MediaCard';
 import { RatingBadge } from '../components/RatingBadge';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { WatchStatusButton } from '../components/WatchStatusButton';
 import { CinematicPoster } from '../components/CinematicPoster';
 
+// Fisher-Yates array randomizer
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [heroSearchQuery, setHeroSearchQuery] = useState('');
 
-  // Featured Spotlight Media: Uncontrollably Fond or Crash Landing on You
-  const featuredMedia = MOCK_MEDIA[0];
+  // Randomly shuffled trending dramas on each page refresh
+  const [trendingDramas, setTrendingDramas] = useState<MediaItem[]>(() => {
+    const allDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv');
+    return shuffleArray(allDramas).slice(0, 5);
+  });
 
-  // Sections
-  const trendingDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv').slice(0, 5);
-  const popularMovies = MOCK_MEDIA.filter((m) => m.media_type === 'movie').slice(0, 5);
+  // Randomly shuffled popular movies on each page refresh
+  const [popularMovies, setPopularMovies] = useState<MediaItem[]>(() => {
+    const allMovies = MOCK_MEDIA.filter((m) => m.media_type === 'movie');
+    return shuffleArray(allMovies).slice(0, 5);
+  });
+
+  // Dynamic featured spotlight selected from top-rated dramas (>= 8.9)
+  const [featuredMedia] = useState<MediaItem>(() => {
+    const topDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv' && m.dramify_community_rating >= 8.9);
+    return topDramas[Math.floor(Math.random() * topDramas.length)] || MOCK_MEDIA[0];
+  });
+
   const communityFavorites = [...MOCK_MEDIA]
     .sort((a, b) => b.dramify_community_rating - a.dramify_community_rating)
     .slice(0, 4);
@@ -191,13 +214,27 @@ export const HomePage: React.FC = () => {
               The most discussed and tracked Korean series right now
             </p>
           </div>
-          <Link
-            to="/discover?type=tv"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors group"
-          >
-            <span>See All</span>
-            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const allDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv');
+                setTrendingDramas(shuffleArray(allDramas).slice(0, 5));
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 hover:text-white border border-white/10 transition-all cursor-pointer group"
+              title="Shuffle Trending K-Dramas"
+            >
+              <Shuffle size={13} className="text-rose-400 group-hover:rotate-180 transition-transform duration-300" />
+              <span>Shuffle</span>
+            </button>
+            <Link
+              to="/discover?type=tv"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors group"
+            >
+              <span>See All</span>
+              <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
 
         {/* Media Grid */}
@@ -222,13 +259,27 @@ export const HomePage: React.FC = () => {
               Korean cinematic masterpieces and box office thrillers
             </p>
           </div>
-          <Link
-            to="/discover?type=movie"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors group"
-          >
-            <span>See All</span>
-            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const allMovies = MOCK_MEDIA.filter((m) => m.media_type === 'movie');
+                setPopularMovies(shuffleArray(allMovies).slice(0, 5));
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 hover:text-white border border-white/10 transition-all cursor-pointer group"
+              title="Shuffle K-Movies"
+            >
+              <Shuffle size={13} className="text-amber-400 group-hover:rotate-180 transition-transform duration-300" />
+              <span>Shuffle</span>
+            </button>
+            <Link
+              to="/discover?type=movie"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors group"
+            >
+              <span>See All</span>
+              <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
 
         {/* Media Grid */}

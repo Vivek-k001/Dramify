@@ -10,9 +10,9 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'rev-1',
     userId: 'u-1',
-    username: 'vivek',
-    displayName: 'Vivek',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    username: 'jieun_park',
+    displayName: 'Ji-eun Park',
+    avatarUrl: '/avatars/avatar-3.jpg',
     tmdb_id: 66897, // Uncontrollably Fond
     media_type: 'tv',
     rating: 10,
@@ -23,9 +23,9 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'rev-2',
     userId: 'u-2',
-    username: 'vivek',
-    displayName: 'Vivek',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    username: 'alex_cinema',
+    displayName: 'Alex Thorne',
+    avatarUrl: '/avatars/avatar-5.jpg',
     tmdb_id: 670, // Oldboy
     media_type: 'movie',
     rating: 10,
@@ -36,9 +36,9 @@ export const MOCK_REVIEWS: Review[] = [
   {
     id: 'rev-3',
     userId: 'u-3',
-    username: 'vivek',
-    displayName: 'Vivek',
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    username: 'minho_action',
+    displayName: 'Min-ho Song',
+    avatarUrl: '/avatars/avatar-6.jpg',
     tmdb_id: 205120, // Weak Hero Class 1
     media_type: 'tv',
     rating: 10,

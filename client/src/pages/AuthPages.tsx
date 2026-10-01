@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Mail, Lock, User, ArrowRight, Film, AlertCircle, Check } from 'lucide-react';
-import { authApi, setToken } from '../services/api';
+import { authApi, profileApi } from '../services/api';
 import { STREAMING_AVATARS, getSavedAvatar, saveAvatar } from '../data/avatars';
+import { useAuth } from '../context/AuthContext';
 import { cn } from '../utils/cn';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login: setAuthLogin } = useAuth();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,10 +21,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       const res = await authApi.login({ login, password });
-      setToken(res.token);
-      if (res.user?.avatarUrl) {
-        saveAvatar(res.user.avatarUrl);
-      }
+      setAuthLogin(res.token, res.user);
       navigate('/profile');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -116,6 +115,7 @@ export const LoginPage: React.FC = () => {
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login: setAuthLogin } = useAuth();
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -136,8 +136,13 @@ export const RegisterPage: React.FC = () => {
         email,
         password,
       });
-      setToken(res.token);
       saveAvatar(selectedAvatarUrl);
+      const userWithAvatar = {
+        ...res.user,
+        avatarUrl: selectedAvatarUrl,
+      };
+      setAuthLogin(res.token, userWithAvatar);
+      profileApi.updateProfile({ avatarUrl: selectedAvatarUrl }).catch(() => {});
       navigate('/profile');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');

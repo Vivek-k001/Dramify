@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Star,
@@ -14,33 +14,96 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { MOCK_MEDIA, MOCK_REVIEWS } from '../data/mockMedia';
-import { WatchStatus } from '../types/media';
+import { WatchStatus, Review } from '../types/media';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { EmptyState } from '../components/EmptyState';
 import { CinematicPoster } from '../components/CinematicPoster';
 import { ActorAvatar } from '../components/ActorAvatar';
+import { useAuth } from '../context/AuthContext';
+import { getSavedAvatar } from '../data/avatars';
+import { interactionApi, reviewApi } from '../services/api';
 import { cn } from '../utils/cn';
 
 export const MediaDetailPage: React.FC = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
+  const { user, isAuthenticated } = useAuth();
 
   // Find media in mock dataset by tmdb_id or id
   const media = MOCK_MEDIA.find(
     (m) => m.tmdb_id === Number(id) && m.media_type === type
   ) || MOCK_MEDIA.find((m) => m.tmdb_id === Number(id)) || MOCK_MEDIA.find((m) => m.id === Number(id)) || MOCK_MEDIA[0];
 
-  // User interactive state
+  // User interactive state (unauthenticated or unrated defaults to null)
   const [userRating, setUserRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
-  const [userStatus, setUserStatus] = useState<WatchStatus | null>('watching');
+  const [userStatus, setUserStatus] = useState<WatchStatus | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Reviews for this media
-  const reviews = MOCK_REVIEWS.filter((r) => r.tmdb_id === media.tmdb_id);
+  const [mediaReviews, setMediaReviews] = useState<Review[]>(() =>
+    MOCK_REVIEWS.filter((r) => r.tmdb_id === media.tmdb_id)
+  );
 
   // Review Form state
   const [newReviewText, setNewReviewText] = useState('');
   const [submittedReview, setSubmittedReview] = useState(false);
+
+  // Load existing user interaction from backend if logged in
+  useEffect(() => {
+    if (isAuthenticated && media?.tmdb_id) {
+      interactionApi
+        .getInteraction(media.media_type, media.tmdb_id)
+        .then((res) => {
+          if (res) {
+            if (res.status) setUserStatus(res.status as WatchStatus);
+            if (res.rating) setUserRating(res.rating);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isAuthenticated, media?.tmdb_id, media?.media_type]);
+
+  const handleStatusChange = async (st: WatchStatus) => {
+    const nextStatus = userStatus === st ? null : st;
+    setUserStatus(nextStatus);
+    if (isAuthenticated && media) {
+      try {
+        await interactionApi.saveInteraction({
+          tmdbId: media.tmdb_id,
+          mediaType: media.media_type,
+          title: media.title,
+          posterPath: media.poster_path,
+          koreanTitle: media.korean_title,
+          releaseYear: media.release_year,
+          status: nextStatus,
+          rating: userRating,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const handleRatingChange = async (ratingVal: number) => {
+    const nextRating = userRating === ratingVal ? null : ratingVal;
+    setUserRating(nextRating);
+    if (isAuthenticated && media) {
+      try {
+        await interactionApi.saveInteraction({
+          tmdbId: media.tmdb_id,
+          mediaType: media.media_type,
+          title: media.title,
+          posterPath: media.poster_path,
+          koreanTitle: media.korean_title,
+          releaseYear: media.release_year,
+          status: userStatus,
+          rating: nextRating,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   const isDrama = media.media_type === 'tv';
 
@@ -50,12 +113,40 @@ export const MediaDetailPage: React.FC = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newReviewText.trim()) {
-      setSubmittedReview(true);
-      setNewReviewText('');
-      setTimeout(() => setSubmittedReview(false), 4000);
+    if (!newReviewText.trim()) return;
+
+    const newRev: Review = {
+      id: `rev-${Date.now()}`,
+      userId: user?.id || 'u-self',
+      username: user?.username || 'user',
+      displayName: user?.displayName || user?.username || 'Anonymous',
+      avatarUrl: user?.avatarUrl || getSavedAvatar(),
+      tmdb_id: media.tmdb_id,
+      media_type: media.media_type,
+      rating: userRating || 10,
+      content: newReviewText.trim(),
+      createdAt: 'Just now',
+      likesCount: 0,
+    };
+
+    setMediaReviews((prev) => [newRev, ...prev]);
+    setSubmittedReview(true);
+    setNewReviewText('');
+    setTimeout(() => setSubmittedReview(false), 4000);
+
+    if (isAuthenticated) {
+      try {
+        await reviewApi.postReview({
+          tmdbId: media.tmdb_id,
+          mediaType: media.media_type,
+          rating: userRating || 10,
+          content: newReviewText.trim(),
+        });
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -149,7 +240,7 @@ export const MediaDetailPage: React.FC = () => {
                     <button
                       key={st.id}
                       type="button"
-                      onClick={() => setUserStatus(userStatus === st.id ? null : st.id)}
+                      onClick={() => handleStatusChange(st.id)}
                       className={cn(
                         'py-2 rounded-lg font-medium transition-all text-center',
                         userStatus === st.id
@@ -184,7 +275,7 @@ export const MediaDetailPage: React.FC = () => {
                         type="button"
                         onMouseEnter={() => setHoverRating(starVal)}
                         onMouseLeave={() => setHoverRating(null)}
-                        onClick={() => setUserRating(userRating === starVal ? null : starVal)}
+                        onClick={() => handleRatingChange(starVal)}
                         className="p-0.5 hover:scale-125 transition-transform"
                         aria-label={`Rate ${starVal} out of 10`}
                       >
@@ -374,7 +465,7 @@ export const MediaDetailPage: React.FC = () => {
                 <div className="space-y-1">
                   <h2 className="font-display font-bold text-lg sm:text-xl text-white flex items-center gap-2">
                     <MessageSquare size={17} className="text-rose-400" />
-                    <span>Community Reviews ({reviews.length})</span>
+                    <span>Community Reviews ({mediaReviews.length})</span>
                   </h2>
                   <p className="text-xs text-slate-400">
                     Fan critiques and commentary
@@ -383,41 +474,69 @@ export const MediaDetailPage: React.FC = () => {
               </div>
 
               {/* Submit Review Box */}
-              <form onSubmit={handleReviewSubmit} className="space-y-3">
-                <div className="p-4 rounded-2xl bg-[#12141B] border border-white/8 space-y-3">
-                  <label className="text-xs font-semibold text-slate-300 block">
-                    Write Your Review
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={newReviewText}
-                    onChange={(e) => setNewReviewText(e.target.value)}
-                    placeholder={`Share your thoughts on ${media.title}...`}
-                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-crimson"
-                  />
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-500">
-                      Logged in as Vivek
-                    </span>
-                    <button
-                      type="submit"
-                      disabled={!newReviewText.trim()}
-                      className="px-5 py-2 rounded-full bg-crimson hover:bg-crimsonHover disabled:opacity-40 text-white text-xs font-bold transition-all"
+              {isAuthenticated && user ? (
+                <form onSubmit={handleReviewSubmit} className="space-y-3">
+                  <div className="p-4 rounded-2xl bg-[#12141B] border border-white/8 space-y-3">
+                    <label className="text-xs font-semibold text-slate-300 block">
+                      Write Your Review
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={newReviewText}
+                      onChange={(e) => setNewReviewText(e.target.value)}
+                      placeholder={`Share your thoughts on ${media.title}...`}
+                      className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-crimson"
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400">
+                        Logged in as{' '}
+                        <strong className="text-white font-medium">
+                          {user.displayName || user.username}
+                        </strong>
+                      </span>
+                      <button
+                        type="submit"
+                        disabled={!newReviewText.trim()}
+                        className="px-5 py-2 rounded-full bg-crimson hover:bg-crimsonHover disabled:opacity-40 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+                      >
+                        Post Review
+                      </button>
+                    </div>
+                  </div>
+                  {submittedReview && (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                      Review submitted successfully! Saved to Dramify archive.
+                    </div>
+                  )}
+                </form>
+              ) : (
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#12141B] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-xs font-bold text-white mb-0.5">Want to write a review?</h4>
+                    <p className="text-[11px] text-slate-400">
+                      Sign in or create an account to share your critique and rate this title.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Link
+                      to="/login"
+                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
                     >
-                      Post Review
-                    </button>
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="px-3.5 py-1.5 rounded-full bg-crimson hover:bg-crimsonHover text-white text-xs font-bold transition-all shadow-md"
+                    >
+                      Sign Up
+                    </Link>
                   </div>
                 </div>
-                {submittedReview && (
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-                    Review submitted successfully! Saved to Dramify archive.
-                  </div>
-                )}
-              </form>
+              )}
 
               {/* Reviews List */}
               <div className="space-y-3">
-                {reviews.map((rev) => (
+                {mediaReviews.map((rev) => (
                   <div
                     key={rev.id}
                     className="p-4 rounded-2xl bg-[#12141B] border border-white/8 space-y-2"

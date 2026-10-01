@@ -10,9 +10,12 @@ import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { PromoPage } from './pages/PromoPage';
 
+import { AuthProvider } from './context/AuthContext';
+
 export const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<RootLayout />}>
           <Route index element={<HomePage />} />
@@ -29,7 +32,8 @@ export const App: React.FC = () => {
         </Route>
       </Routes>
     </BrowserRouter>
-  );
+  </AuthProvider>
+);
 };
 
 export default App;

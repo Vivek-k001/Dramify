@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import {
   Trophy,
   Tv,
@@ -10,30 +10,127 @@ import {
   Check,
   Search,
   SlidersHorizontal,
-  Flame
+  Flame,
+  User as UserIcon,
+  LogOut
 } from 'lucide-react';
 import { MOCK_USER_PROFILE, MOCK_MEDIA } from '../data/mockMedia';
+import { USER_WATCHED_TITLES } from '../data/userWatchedList';
 import { MediaCard } from '../components/MediaCard';
 import { ProfileAvatarPicker } from '../components/ProfileAvatarPicker';
 import { getSavedAvatar, saveAvatar, ProfileAvatar } from '../data/avatars';
+import { useAuth } from '../context/AuthContext';
+import { profileApi } from '../services/api';
 import { cn } from '../utils/cn';
 
 type MediaSlideType = 'tv' | 'movie';
 
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username?: string }>();
+  const { user: currentUser, isAuthenticated, updateUser, logout } = useAuth();
+
+  // If user visits /profile while not logged in:
+  if (!username && !isAuthenticated) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-6">
+        <div className="p-8 sm:p-12 rounded-3xl bg-[#101217] border border-white/10 shadow-2xl space-y-6">
+          <div className="w-16 h-16 rounded-full bg-crimson/15 text-rose-400 border border-crimson/25 mx-auto flex items-center justify-center">
+            <UserIcon size={28} />
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-white">
+              Create Your Dramify Profile
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+              Sign in or create an account to start cataloging your watched K-Dramas, build your personal Top 3 podium, and discover taste matches.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link
+              to="/login"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-full text-xs font-semibold text-slate-200 bg-white/10 hover:bg-white/15 transition-all"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-crimson hover:bg-crimsonHover text-white text-xs font-bold shadow-lg shadow-crimson/30 transition-all hover:scale-105"
+            >
+              Create Account
+            </Link>
+          </div>
+          <div className="pt-4 border-t border-white/5">
+            <p className="text-xs text-slate-500">
+              Want to see an example?{' '}
+              <Link to="/u/vivek" className="text-rose-400 hover:underline font-medium">
+                View Curator Vivek&apos;s 148 tracked titles &rarr;
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // 1. Sliding Pill Section: 'tv' (K-Drama) or 'movie' (K-Movie)
   const [slideType, setSlideType] = useState<MediaSlideType>('tv');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'default' | 'rating' | 'year' | 'title'>('default');
   const [copiedLink, setCopiedLink] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string>(() => getSavedAvatar());
 
-  const profile = MOCK_USER_PROFILE;
-  const isSelf = !username || username === profile.username;
+  // Determine profile identity:
+  const isCurator = username?.toLowerCase() === 'vivek';
+  const isSelf = (!username && !!currentUser) || (!!username && !!currentUser && currentUser.username.toLowerCase() === username.toLowerCase());
 
-  // Split all 147 titles into Dramas and Movies
+  const profile = useMemo(() => {
+    if (isCurator) {
+      return MOCK_USER_PROFILE;
+    }
+    if (isSelf && currentUser) {
+      return {
+        username: currentUser.username,
+        displayName: currentUser.displayName || currentUser.username,
+        avatarUrl: currentUser.avatarUrl || getSavedAvatar(),
+        bio: currentUser.bio || 'Hallyu enthusiast tracking Korean dramas and films on Dramify.',
+        joinDate: 'Joined recently',
+        stats: {
+          watched: USER_WATCHED_TITLES.length,
+          favorites: 18,
+          watching: 3,
+          planToWatch: 12,
+          avgRating: 9.1,
+        },
+        topThreeDramas: MOCK_USER_PROFILE.topThreeDramas,
+        topThreeMovies: MOCK_USER_PROFILE.topThreeMovies,
+      };
+    }
+    // Viewing another user
+    return {
+      username: username || 'user',
+      displayName: username || 'User',
+      avatarUrl: getSavedAvatar(),
+      bio: 'Drama fan on Dramify.',
+      joinDate: '2024',
+      stats: {
+        watched: 24,
+        favorites: 8,
+        watching: 2,
+        planToWatch: 10,
+        avgRating: 8.8,
+      },
+      topThreeDramas: MOCK_USER_PROFILE.topThreeDramas,
+      topThreeMovies: MOCK_USER_PROFILE.topThreeMovies,
+    };
+  }, [isCurator, isSelf, currentUser, username]);
+
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => profile.avatarUrl || getSavedAvatar());
+
+  useEffect(() => {
+    setAvatarUrl(profile.avatarUrl || getSavedAvatar());
+  }, [profile.avatarUrl]);
+
+  // Split titles into Dramas and Movies
   const allWatchedTitles = MOCK_MEDIA;
   const kdramas = useMemo(() => allWatchedTitles.filter((m) => m.media_type === 'tv'), [allWatchedTitles]);
   const kmovies = useMemo(() => allWatchedTitles.filter((m) => m.media_type === 'movie'), [allWatchedTitles]);
@@ -75,6 +172,10 @@ export const ProfilePage: React.FC = () => {
   const handleAvatarSelect = (avatar: ProfileAvatar) => {
     setAvatarUrl(avatar.url);
     saveAvatar(avatar.url);
+    if (isSelf) {
+      updateUser({ avatarUrl: avatar.url });
+      profileApi.updateProfile({ avatarUrl: avatar.url }).catch(() => {});
+    }
     setShowAvatarPicker(false);
   };
 
@@ -123,21 +224,39 @@ export const ProfilePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-medium border border-white/10 transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-medium border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   {copiedLink ? <Check size={13} className="text-emerald-400" /> : <Share2 size={13} />}
                   <span>{copiedLink ? 'Copied' : 'Share Profile'}</span>
                 </button>
 
+                {!isSelf && currentUser && (
+                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold">
+                    <Sparkles size={13} className="text-rose-400" />
+                    <span>94% Taste Match</span>
+                  </div>
+                )}
+
                 {isSelf && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAvatarPicker(true)}
-                    className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-crimson text-white text-xs font-semibold border border-white/15 transition-all flex items-center gap-1.5 group"
-                  >
-                    <Sparkles size={13} className="text-rose-400 group-hover:text-white transition-colors" />
-                    <span>Change Avatar</span>
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowAvatarPicker(true)}
+                      className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-crimson text-white text-xs font-semibold border border-white/15 transition-all flex items-center gap-1.5 group cursor-pointer"
+                    >
+                      <Sparkles size={13} className="text-rose-400 group-hover:text-white transition-colors" />
+                      <span>Change Avatar</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => logout()}
+                      className="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 text-xs font-medium border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      title="Sign Out"
+                    >
+                      <LogOut size={13} />
+                      <span className="hidden sm:inline">Sign Out</span>
+                    </button>
+                  </>
                 )}
               </div>
             </div>
