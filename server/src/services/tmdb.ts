@@ -58,23 +58,34 @@ export async function fetchPopularKMovies(page = 1) {
   }
 }
 
-// Search Korean Content
+// Search Korean Content (Strictly filtered to Korean origin: KR country or ko language)
 export async function searchKoreanMedia(query: string, type = 'all', page = 1) {
   const apiKey = process.env.TMDB_API_KEY || process.env.TMDB_ACCESS_TOKEN;
   if (!apiKey) return null;
 
   try {
-    let endpoint = `${TMDB_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&page=${page}`;
+    let endpoint = `${TMDB_BASE_URL}/search/multi?query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
     if (type === 'tv') {
-      endpoint = `${TMDB_BASE_URL}/search/tv?query=${encodeURIComponent(query)}&page=${page}`;
+      endpoint = `${TMDB_BASE_URL}/search/tv?query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
     } else if (type === 'movie') {
-      endpoint = `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}`;
+      endpoint = `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
     }
 
     const url = appendApiKey(endpoint);
     const res = await fetch(url, { headers: getTmdbHeaders() });
     if (!res.ok) throw new Error(`TMDB error ${res.status}`);
-    const data = await res.json();
+    const data = (await res.json()) as any;
+
+    // STRICT KOREAN FILTER:
+    // Only allow items where original_language is 'ko' OR origin_country includes 'KR'
+    if (data && Array.isArray(data.results)) {
+      data.results = data.results.filter((item: any) => {
+        const isKoreanLang = item.original_language === 'ko';
+        const isKoreanCountry = Array.isArray(item.origin_country) && item.origin_country.includes('KR');
+        return isKoreanLang || isKoreanCountry;
+      });
+    }
+
     return data;
   } catch (err) {
     console.error('Error searching TMDB:', err);

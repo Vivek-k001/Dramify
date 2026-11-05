@@ -37,7 +37,15 @@ export const SearchPage: React.FC = () => {
         .search(q.trim(), 'all', 1)
         .then((res) => {
           if (res?.results && Array.isArray(res.results)) {
-            const mapped: MediaItem[] = res.results.map((item: any) => {
+            const mapped: MediaItem[] = res.results
+              .filter((item: any) => {
+                // Strict Korean Filter: must be Korean origin language ('ko') or origin country 'KR'
+                const isKorean =
+                  item.original_language === 'ko' ||
+                  (Array.isArray(item.origin_country) && item.origin_country.includes('KR'));
+                return isKorean;
+              })
+              .map((item: any) => {
               const isTv = item.media_type === 'tv' || (!item.title && !!item.name);
               const title = isTv ? item.name : item.title;
               const originalTitle = isTv ? item.original_name : item.original_title;

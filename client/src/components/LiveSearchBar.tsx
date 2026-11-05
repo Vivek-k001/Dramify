@@ -94,6 +94,13 @@ export const LiveSearchBar: React.FC<LiveSearchBarProps> = ({
           if (res?.results && Array.isArray(res.results)) {
             tmdbMatches = res.results
               .filter((item: any) => {
+                // Strict Korean Filter: must be Korean origin language ('ko') or origin country 'KR'
+                const isKorean =
+                  item.original_language === 'ko' ||
+                  (Array.isArray(item.origin_country) && item.origin_country.includes('KR'));
+                
+                if (!isKorean) return false;
+
                 // Deduplicate against local matches
                 return !localMatches.some((lm) => lm.tmdb_id === item.id);
               })
