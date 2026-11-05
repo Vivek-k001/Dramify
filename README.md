@@ -4,7 +4,7 @@
 ### *The Premium Social Tracking & Discovery Platform for Korean Drama & Cinema*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-rose.svg?style=for-the-badge)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/Live_App-dramify--olive.vercel.app-rose.svg?style=for-the-badge&logo=vercel)](https://dramify-olive.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live_App-dramify--official.vercel.app-rose.svg?style=for-the-badge&logo=vercel)](https://dramify-olive.vercel.app/)
 [![Render API](https://img.shields.io/badge/Backend_API-Render_Live-46E3B7.svg?style=for-the-badge&logo=render)](https://dramify-server.onrender.com/api/health)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
