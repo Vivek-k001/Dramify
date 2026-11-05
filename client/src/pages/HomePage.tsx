@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Flame, Award, Heart, Sparkles, ArrowRight, Play, Star, Shuffle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Flame, Award, Heart, Sparkles, ArrowRight, Play, Star, Shuffle } from 'lucide-react';
 import { MOCK_MEDIA, MOCK_REVIEWS } from '../data/mockMedia';
 import { MediaItem } from '../types/media';
 import { MediaCard } from '../components/MediaCard';
@@ -8,6 +8,7 @@ import { RatingBadge } from '../components/RatingBadge';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { WatchStatusButton } from '../components/WatchStatusButton';
 import { CinematicPoster } from '../components/CinematicPoster';
+import { LiveSearchBar } from '../components/LiveSearchBar';
 
 // Fisher-Yates array randomizer
 function shuffleArray<T>(array: T[]): T[] {
@@ -20,9 +21,6 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const [heroSearchQuery, setHeroSearchQuery] = useState('');
-
   // Randomly shuffled trending dramas on each page refresh
   const [trendingDramas, setTrendingDramas] = useState<MediaItem[]>(() => {
     const allDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv');
@@ -44,13 +42,6 @@ export const HomePage: React.FC = () => {
   const communityFavorites = [...MOCK_MEDIA]
     .sort((a, b) => b.dramify_community_rating - a.dramify_community_rating)
     .slice(0, 4);
-
-  const handleHeroSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (heroSearchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(heroSearchQuery.trim())}`);
-    }
-  };
 
   const genres = [
     'Romance',
@@ -92,26 +83,10 @@ export const HomePage: React.FC = () => {
                 Log watched series, curate your personal Top 3 podium, compare TMDB and community scores, and explore verified Korean releases.
               </p>
 
-              {/* Functional Search Bar */}
-              <form onSubmit={handleHeroSearchSubmit} className="max-w-xl">
-                <div className="relative flex items-center">
-                  <input
-                    type="text"
-                    value={heroSearchQuery}
-                    onChange={(e) => setHeroSearchQuery(e.target.value)}
-                    placeholder="Search by English or Hangul title, actor, or genre..."
-                    className="w-full pl-12 pr-28 py-3.5 sm:py-4 rounded-full bg-[#161922] border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-crimson shadow-inner transition-all"
-                  />
-                  <Search size={18} className="absolute left-4 text-slate-500 pointer-events-none" />
-                  <button
-                    type="submit"
-                    className="absolute right-1.5 sm:right-2 px-5 py-2.5 rounded-full bg-crimson hover:bg-crimsonHover text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5 group"
-                  >
-                    <span>Search</span>
-                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                </div>
-              </form>
+              {/* Live Autocomplete Search Bar */}
+              <div className="max-w-xl">
+                <LiveSearchBar placeholder="Search any K-Drama or Movie (Vincenzo, Twinkling Watermelon, etc.)..." />
+              </div>
 
               {/* Quick Genre Pills */}
               <div className="flex items-center gap-2 flex-wrap pt-1">

@@ -6,6 +6,8 @@ import { MediaCard } from '../components/MediaCard';
 import { MediaCardSkeleton } from '../components/MediaCardSkeleton';
 import { EmptyState } from '../components/EmptyState';
 import { Tabs } from '../components/Tabs';
+import { tmdbApi } from '../services/api';
+import { MediaItem } from '../types/media';
 
 type FilterType = 'all' | 'tv' | 'movie';
 
@@ -19,6 +21,7 @@ export const SearchPage: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState(initialGenre);
   const [sortBy, setSortBy] = useState<'popularity' | 'rating' | 'year'>('popularity');
   const [isLoading, setIsLoading] = useState(false);
+  const [tmdbExtraResults, setTmdbExtraResults] = useState<MediaItem[]>([]);
 
   // Sync state when URL params change
   useEffect(() => {
@@ -26,6 +29,60 @@ export const SearchPage: React.FC = () => {
     const g = searchParams.get('genre') || '';
     setQuery(q);
     setSelectedGenre(g);
+
+    // If query exists, also query TMDB for global results
+    if (q.trim()) {
+      setIsLoading(true);
+      tmdbApi
+        .search(q.trim(), 'all', 1)
+        .then((res) => {
+          if (res?.results && Array.isArray(res.results)) {
+            const mapped: MediaItem[] = res.results.map((item: any) => {
+              const isTv = item.media_type === 'tv' || (!item.title && !!item.name);
+              const title = isTv ? item.name : item.title;
+              const originalTitle = isTv ? item.original_name : item.original_title;
+              const dateStr = isTv ? item.first_air_date : item.release_date;
+              const year = dateStr ? new Date(dateStr).getFullYear() : 0;
+              const poster = item.poster_path
+                ? (item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`)
+                : '';
+              const backdrop = item.backdrop_path
+                ? (item.backdrop_path.startsWith('http') ? item.backdrop_path : `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`)
+                : '';
+
+              return {
+                id: item.id,
+                tmdb_id: item.id,
+                title: title || originalTitle || 'Untitled',
+                original_title: originalTitle || '',
+                korean_title: originalTitle || '',
+                overview: item.overview || '',
+                poster_path: poster,
+                backdrop_path: backdrop,
+                media_type: (isTv ? 'tv' : 'movie') as 'tv' | 'movie',
+                release_date: dateStr || '',
+                release_year: year,
+                vote_average: Number(item.vote_average?.toFixed(1)) || 0,
+                vote_count: item.vote_count || 0,
+                dramify_community_rating: Number(item.vote_average?.toFixed(1)) || 8.5,
+                dramify_ratings_count: Math.floor((item.vote_count || 10) / 2),
+                genres: [],
+                status: 'Released',
+                cast: [],
+              };
+            });
+            setTmdbExtraResults(mapped);
+          }
+        })
+        .catch((err) => {
+          console.warn('TMDB search error:', err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setTmdbExtraResults([]);
+    }
   }, [searchParams]);
 
   // Handle typing with debounced URL update
@@ -57,7 +114,17 @@ export const SearchPage: React.FC = () => {
 
   // Filter and sort results
   const filteredResults = useMemo(() => {
-    let list = [...MOCK_MEDIA];
+    // Merge local curated results with TMDB extra results, deduplicating by tmdb_id
+    const combinedMap = new Map<number, MediaItem>();
+
+    MOCK_MEDIA.forEach((item) => combinedMap.set(item.tmdb_id, item));
+    tmdbExtraResults.forEach((item) => {
+      if (!combinedMap.has(item.tmdb_id)) {
+        combinedMap.set(item.tmdb_id, item);
+      }
+    });
+
+    let list = Array.from(combinedMap.values());
 
     // Query filter
     if (query.trim()) {

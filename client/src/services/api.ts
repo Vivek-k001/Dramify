@@ -127,3 +127,20 @@ export const profileApi = {
       `/profile/${username}/taste-match`
     ),
 };
+
+// TMDB Live API
+export const tmdbApi = {
+  search: (query: string, type: 'all' | 'tv' | 'movie' = 'all', page = 1) =>
+    request<{ results: any[]; page?: number; total_pages?: number; total_results?: number; fallback?: boolean }>(
+      `/tmdb/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}`
+    ),
+
+  getMediaDetails: (type: 'tv' | 'movie', id: number) =>
+    request<any>(`/tmdb/media/${type}/${id}`),
+
+  getTrendingDramas: (page = 1) =>
+    request<{ results: any[]; fallback?: boolean }>(`/tmdb/trending/dramas?page=${page}`),
+
+  getPopularMovies: (page = 1) =>
+    request<{ results: any[]; fallback?: boolean }>(`/tmdb/popular/movies?page=${page}`),
+};

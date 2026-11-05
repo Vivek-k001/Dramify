@@ -14,24 +14,93 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { MOCK_MEDIA, MOCK_REVIEWS } from '../data/mockMedia';
-import { WatchStatus, Review } from '../types/media';
+import { WatchStatus, Review, MediaItem } from '../types/media';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { EmptyState } from '../components/EmptyState';
 import { CinematicPoster } from '../components/CinematicPoster';
 import { ActorAvatar } from '../components/ActorAvatar';
 import { useAuth } from '../context/AuthContext';
 import { getSavedAvatar } from '../data/avatars';
-import { interactionApi, reviewApi } from '../services/api';
+import { interactionApi, reviewApi, tmdbApi } from '../services/api';
 import { cn } from '../utils/cn';
 
 export const MediaDetailPage: React.FC = () => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const { user, isAuthenticated } = useAuth();
 
-  // Find media in mock dataset by tmdb_id or id
-  const media = MOCK_MEDIA.find(
+  // Find media in mock dataset by tmdb_id or id, or fall back to dynamically loaded TMDB state
+  const mockMatch = MOCK_MEDIA.find(
     (m) => m.tmdb_id === Number(id) && m.media_type === type
-  ) || MOCK_MEDIA.find((m) => m.tmdb_id === Number(id)) || MOCK_MEDIA.find((m) => m.id === Number(id)) || MOCK_MEDIA[0];
+  ) || MOCK_MEDIA.find((m) => m.tmdb_id === Number(id)) || MOCK_MEDIA.find((m) => m.id === Number(id));
+
+  const [dynamicMedia, setDynamicMedia] = useState<MediaItem | null>(null);
+  const [, setIsLoadingDetails] = useState<boolean>(!mockMatch);
+
+  // Fetch full details from TMDB if not in local 148 mock library
+  useEffect(() => {
+    if (!mockMatch && id && type) {
+      setIsLoadingDetails(true);
+      tmdbApi
+        .getMediaDetails(type as 'tv' | 'movie', Number(id))
+        .then((data) => {
+          if (data && !data.fallback) {
+            const isTv = type === 'tv';
+            const title = isTv ? data.name : data.title;
+            const originalTitle = isTv ? data.original_name : data.original_title;
+            const dateStr = isTv ? data.first_air_date : data.release_date;
+            const year = dateStr ? new Date(dateStr).getFullYear() : 0;
+            const poster = data.poster_path
+              ? (data.poster_path.startsWith('http') ? data.poster_path : `https://image.tmdb.org/t/p/w780${data.poster_path}`)
+              : '';
+            const backdrop = data.backdrop_path
+              ? (data.backdrop_path.startsWith('http') ? data.backdrop_path : `https://image.tmdb.org/t/p/w1280${data.backdrop_path}`)
+              : '';
+
+            const castMembers = (data.credits?.cast || []).slice(0, 8).map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              character: c.character || 'Cast Member',
+              profile_path: c.profile_path ? `https://image.tmdb.org/t/p/w185${c.profile_path}` : undefined,
+            }));
+
+            const item: MediaItem = {
+              id: data.id,
+              tmdb_id: data.id,
+              title: title || originalTitle || 'Untitled',
+              original_title: originalTitle || '',
+              korean_title: originalTitle || '',
+              overview: data.overview || 'No overview available.',
+              poster_path: poster,
+              backdrop_path: backdrop,
+              media_type: (isTv ? 'tv' : 'movie') as 'tv' | 'movie',
+              release_date: dateStr || '',
+              release_year: year,
+              vote_average: Number(data.vote_average?.toFixed(1)) || 0,
+              vote_count: data.vote_count || 0,
+              dramify_community_rating: Number(data.vote_average?.toFixed(1)) || 8.5,
+              dramify_ratings_count: Math.floor((data.vote_count || 10) / 3),
+              genres: (data.genres || []).map((g: any) => g.name),
+              status: data.status || 'Released',
+              number_of_seasons: data.number_of_seasons,
+              number_of_episodes: data.number_of_episodes,
+              runtime: isTv ? undefined : data.runtime,
+              network: isTv ? data.networks?.[0]?.name : undefined,
+              tagline: data.tagline,
+              cast: castMembers,
+            };
+            setDynamicMedia(item);
+          }
+        })
+        .catch((err) => {
+          console.error('Error fetching TMDB media details:', err);
+        })
+        .finally(() => {
+          setIsLoadingDetails(false);
+        });
+    }
+  }, [id, type, mockMatch]);
+
+  const media = mockMatch || dynamicMedia || MOCK_MEDIA[0];
 
   // User interactive state (unauthenticated or unrated defaults to null)
   const [userRating, setUserRating] = useState<number | null>(null);
@@ -407,7 +476,7 @@ export const MediaDetailPage: React.FC = () => {
 
               {/* Genre Chips */}
               <div className="flex items-center gap-2 flex-wrap">
-                {media.genres.map((genre) => (
+                {media.genres.map((genre: string) => (
                   <Link
                     key={genre}
                     to={`/search?genre=${encodeURIComponent(genre)}`}
@@ -447,7 +516,7 @@ export const MediaDetailPage: React.FC = () => {
                 Featured Cast & Stars
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                {media.cast.map((actor) => (
+                {media.cast.map((actor: any) => (
                   <ActorAvatar
                     key={actor.id}
                     name={actor.name}
