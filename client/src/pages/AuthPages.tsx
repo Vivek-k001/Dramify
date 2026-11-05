@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, Mail, Lock, User, ArrowRight, Film, AlertCircle, Check } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Film, AlertCircle, Check } from 'lucide-react';
 import { authApi, profileApi } from '../services/api';
 import { STREAMING_AVATARS, getSavedAvatar, saveAvatar } from '../data/avatars';
 import { useAuth } from '../context/AuthContext';
@@ -33,17 +33,19 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md p-8 sm:p-10 rounded-3xl bg-[#101217] border border-white/10 shadow-2xl space-y-7 relative overflow-hidden">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <Link to="/" className="inline-flex items-center gap-2 group mb-1">
-            <div className="w-8 h-8 rounded-full bg-crimson flex items-center justify-center text-white font-bold text-sm shadow-md">
-              D
-            </div>
+            <img 
+              src="/dramify-logo.svg" 
+              alt="Dramify" 
+              className="w-10 h-10 rounded-xl shadow-lg shadow-crimson/30 group-hover:scale-105 transition-transform" 
+            />
           </Link>
           <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-white">
             Welcome Back
           </h1>
           <p className="text-xs text-slate-400">
-            Sign in to track your K-Dramas and access your Top 3.
+            Enter your credentials to continue your Korean drama journey.
           </p>
         </div>
 
@@ -154,16 +156,19 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-xl p-8 sm:p-10 rounded-3xl bg-[#101217] border border-white/10 shadow-2xl space-y-7 relative overflow-hidden">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-crimson/15 text-rose-300 border border-crimson/25">
-            <Sparkles size={12} />
-            <span>Join the Dramify Community</span>
-          </div>
+        <div className="text-center space-y-3">
+          <Link to="/" className="inline-flex items-center gap-2 group mb-1">
+            <img 
+              src="/dramify-logo.svg" 
+              alt="Dramify" 
+              className="w-10 h-10 rounded-xl shadow-lg shadow-crimson/30 group-hover:scale-105 transition-transform" 
+            />
+          </Link>
           <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-white">
             Create Your Profile
           </h1>
           <p className="text-xs text-slate-400">
-            Pick your streaming avatar and start tracking Korean dramas & films.
+            Choose your avatar, track what you watch, and share your reviews.
           </p>
         </div>
 
