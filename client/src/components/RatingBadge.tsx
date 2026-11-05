@@ -29,7 +29,7 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
       {/* TMDB Rating */}
-      {tmdbRating !== undefined && (
+      {tmdbRating !== undefined && tmdbRating > 0 && (
         <div
           title={`TMDB Rating: ${tmdbRating.toFixed(1)} / 10`}
           className={`inline-flex items-center rounded-full bg-amber-500/10 text-amber-300 font-semibold border border-amber-500/20 backdrop-blur-sm ${sizeClasses[size]}`}
@@ -40,8 +40,8 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({
         </div>
       )}
 
-      {/* Dramify Community Rating */}
-      {dramifyRating !== undefined && (
+      {/* Dramify Community Rating (Only shown if real community ratings exist > 0) */}
+      {dramifyRating !== undefined && dramifyRating > 0 && (
         <div
           title={`Dramify Community: ${dramifyRating.toFixed(1)} / 10`}
           className={`inline-flex items-center rounded-full bg-rose-500/10 text-rose-300 font-semibold border border-rose-500/20 backdrop-blur-sm ${sizeClasses[size]}`}

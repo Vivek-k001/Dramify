@@ -23,14 +23,16 @@ export const SearchPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tmdbExtraResults, setTmdbExtraResults] = useState<MediaItem[]>([]);
 
-  // Sync state when URL params change
+  // Sync query when searchParams changes externally (e.g. back/forward navigation or initial load)
   useEffect(() => {
     const q = searchParams.get('q') || '';
     const g = searchParams.get('genre') || '';
-    setQuery(q);
     setSelectedGenre(g);
 
-    // If query exists, also query TMDB for global results
+    // Only update query if it differs from what's currently in the input to avoid resetting user typing
+    setQuery((prev) => (prev !== q ? q : prev));
+
+    // If query exists, query TMDB for global results
     if (q.trim()) {
       setIsLoading(true);
       tmdbApi
@@ -39,46 +41,45 @@ export const SearchPage: React.FC = () => {
           if (res?.results && Array.isArray(res.results)) {
             const mapped: MediaItem[] = res.results
               .filter((item: any) => {
-                // Strict Korean Filter: must be Korean origin language ('ko') or origin country 'KR'
                 const isKorean =
                   item.original_language === 'ko' ||
                   (Array.isArray(item.origin_country) && item.origin_country.includes('KR'));
                 return isKorean;
               })
               .map((item: any) => {
-              const isTv = item.media_type === 'tv' || (!item.title && !!item.name);
-              const title = isTv ? item.name : item.title;
-              const originalTitle = isTv ? item.original_name : item.original_title;
-              const dateStr = isTv ? item.first_air_date : item.release_date;
-              const year = dateStr ? new Date(dateStr).getFullYear() : 0;
-              const poster = item.poster_path
-                ? (item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`)
-                : '';
-              const backdrop = item.backdrop_path
-                ? (item.backdrop_path.startsWith('http') ? item.backdrop_path : `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`)
-                : '';
+                const isTv = item.media_type === 'tv' || (!item.title && !!item.name);
+                const title = isTv ? item.name : item.title;
+                const originalTitle = isTv ? item.original_name : item.original_title;
+                const dateStr = isTv ? item.first_air_date : item.release_date;
+                const year = dateStr ? new Date(dateStr).getFullYear() : 0;
+                const poster = item.poster_path
+                  ? (item.poster_path.startsWith('http') ? item.poster_path : `https://image.tmdb.org/t/p/w500${item.poster_path}`)
+                  : '';
+                const backdrop = item.backdrop_path
+                  ? (item.backdrop_path.startsWith('http') ? item.backdrop_path : `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`)
+                  : '';
 
-              return {
-                id: item.id,
-                tmdb_id: item.id,
-                title: title || originalTitle || 'Untitled',
-                original_title: originalTitle || '',
-                korean_title: originalTitle || '',
-                overview: item.overview || '',
-                poster_path: poster,
-                backdrop_path: backdrop,
-                media_type: (isTv ? 'tv' : 'movie') as 'tv' | 'movie',
-                release_date: dateStr || '',
-                release_year: year,
-                vote_average: Number(item.vote_average?.toFixed(1)) || 0,
-                vote_count: item.vote_count || 0,
-                dramify_community_rating: Number(item.vote_average?.toFixed(1)) || 8.5,
-                dramify_ratings_count: Math.floor((item.vote_count || 10) / 2),
-                genres: [],
-                status: 'Released',
-                cast: [],
-              };
-            });
+                return {
+                  id: item.id,
+                  tmdb_id: item.id,
+                  title: title || originalTitle || 'Untitled',
+                  original_title: originalTitle || '',
+                  korean_title: originalTitle || '',
+                  overview: item.overview || '',
+                  poster_path: poster,
+                  backdrop_path: backdrop,
+                  media_type: (isTv ? 'tv' : 'movie') as 'tv' | 'movie',
+                  release_date: dateStr || '',
+                  release_year: year,
+                  vote_average: Number(item.vote_average?.toFixed(1)) || 0,
+                  vote_count: item.vote_count || 0,
+                  dramify_community_rating: 0,
+                  dramify_ratings_count: 0,
+                  genres: [],
+                  status: 'Released',
+                  cast: [],
+                };
+              });
             setTmdbExtraResults(mapped);
           }
         })
@@ -93,14 +94,18 @@ export const SearchPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Handle typing with debounced URL update
+  // Handle typing with debounced URL update without interrupting the input field
+  const debounceTimerRef = React.useRef<any>(null);
+
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setQuery(val);
-    setIsLoading(true);
 
-    const timer = setTimeout(() => {
-      setIsLoading(false);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
       const newParams = new URLSearchParams(searchParams);
       if (val.trim()) {
         newParams.set('q', val);
@@ -108,9 +113,7 @@ export const SearchPage: React.FC = () => {
         newParams.delete('q');
       }
       setSearchParams(newParams, { replace: true });
-    }, 250);
-
-    return () => clearTimeout(timer);
+    }, 400);
   };
 
   const clearSearch = () => {
