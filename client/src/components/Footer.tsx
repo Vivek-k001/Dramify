@@ -11,10 +11,12 @@ export const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
         {/* Brand & Tagline */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
-          <Link to="/" className="flex items-center gap-2 group mb-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-rose-900/40">
-              D
-            </div>
+          <Link to="/" className="flex items-center gap-2.5 group mb-2">
+            <img 
+              src="/dramify-logo.svg" 
+              alt="Dramify" 
+              className="w-7 h-7 rounded-[7px] shadow-md shadow-crimson/30 group-hover:scale-105 transition-transform" 
+            />
             <span className="font-display font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
               DRAMIFY
               <span className="text-[10px] font-hangul text-rose-400/90 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/20">

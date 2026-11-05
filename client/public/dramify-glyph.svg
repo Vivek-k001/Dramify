@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Outer D Path -->
+  <path 
+    fill-rule="evenodd" 
+    clip-rule="evenodd" 
+    d="M100 80H270C375.05 80 460 164.95 460 270C460 375.05 375.05 460 270 460H100V80ZM170 150V390H270C336.274 390 390 336.274 390 270C390 203.726 336.274 150 270 150H170Z" 
+    fill="currentColor"
+  />
+  
+  <!-- Centered Forward Play Triangle Emblem -->
+  <polygon 
+    points="230,195 335,270 230,345" 
+    fill="currentColor"
+  />
+</svg>
+

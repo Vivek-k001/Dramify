@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Rounded Crimson Squircle App Tile -->
+  <rect width="512" height="512" rx="128" fill="#E50914"/>
+  
+  <!-- Outer D Path -->
+  <!-- Crisp white bold geometric D with hollow inner counter -->
+  <path 
+    fill-rule="evenodd" 
+    clip-rule="evenodd" 
+    d="M136 128H280C368.366 128 440 199.634 440 288C440 376.366 368.366 448 280 448H136V128ZM196 188V388H280C335.228 388 380 343.228 380 288C380 232.772 335.228 188 280 188H196Z" 
+    fill="#FFFFFF"
+  />
+  
+  <!-- Centered Forward Play Triangle Emblem -->
+  <polygon 
+    points="244,228 328,288 244,348" 
+    fill="#FFFFFF"
+  />
+</svg>
+

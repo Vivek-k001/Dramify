@@ -35,10 +35,12 @@ export const Navbar: React.FC = () => {
         {/* Detached Floating Island Shell */}
         <nav className="glass-pill w-full px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full flex items-center justify-between gap-4">
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-2 group flex-shrink-0">
-            <div className="w-8 h-8 rounded-full bg-crimson flex items-center justify-center text-white font-bold text-sm shadow-md shadow-crimson/30 group-hover:scale-105 transition-transform">
-              D
-            </div>
+          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
+            <img 
+              src="/dramify-logo.svg" 
+              alt="Dramify" 
+              className="w-8 h-8 rounded-[9px] shadow-md shadow-crimson/30 group-hover:scale-105 transition-transform" 
+            />
             <div className="flex flex-col">
               <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
                 DRAMIFY
