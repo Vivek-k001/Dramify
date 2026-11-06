@@ -1,129 +1,152 @@
 <div align="center">
 
-# 🎬 Dramify (드라마)
-### *The Premium Social Tracking & Discovery Platform for Korean Drama & Cinema*
+<img src="./docs/dramify-logo.png" alt="Dramify Logo" width="80" height="80" style="border-radius: 20px;" />
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-rose.svg?style=for-the-badge)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/Live_App-dramify--official.vercel.app-rose.svg?style=for-the-badge&logo=vercel)](https://dramify-olive.vercel.app/)
-[![Render API](https://img.shields.io/badge/Backend_API-Render_Live-46E3B7.svg?style=for-the-badge&logo=render)](https://dramify-server.onrender.com/api/health)
-[![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+# Dramify (드라마)
 
-<p align="center">
-  A bespoke, cinema-grade web platform engineered specifically for Hallyu fans, K-Drama bingers, and Korean movie connoisseurs. Dramify combines social tracking, dual rating comparison, personalized top-tier podiums, and curated discovery in an Obsidian Cinema design language.
-</p>
+**A social tracking and discovery platform for Korean drama and cinema enthusiasts.**
 
-<p align="center">
-  🚀 <strong>Live Production Deployment</strong>: <a href="https://dramify-official.vercel.app">https://dramify-olive.vercel.app</a>
-</p>
+[![Live App](https://img.shields.io/badge/Live_App-dramify--official.vercel.app-E50914?style=flat-square)](https://dramify-official.vercel.app/)
+[![Backend Status](https://img.shields.io/badge/Backend-Render_Live-10B981?style=flat-square)](https://dramify-server.onrender.com/api/health)
+[![License: MIT](https://img.shields.io/badge/License-MIT-slate?style=flat-square)](LICENSE)
+
+[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [API & Architecture](#api--architecture) • [License](#license)
 
 </div>
 
 ---
 
-## 🎬 Cinematic Motion Graphics Video & Teaser
+## Overview
 
-Experience the Dramify Obsidian Cinema design language, 148 Korean titles library, sliding pill navigation, and dual critic rating HUD in our motion graphics promotional video:
+Dramify is a web platform designed for Hallyu and Korean cinema fans. It allows users to track series and movies, maintain a personalized watchlist, rate titles with community reviews, and curate personal Top 3 podiums.
 
-- 📥 **Direct Video Download**: [`docs/videos/dramify_promo.mp4`](./docs/videos/dramify_promo.mp4) *(1080p Full HD @ 30fps with synthesized cinematic soundtrack)*
-- 🌐 **Interactive In-App Studio**: Visit [`/promo`](https://dramify-olive.vercel.app/promo) inside the Dramify web app for real-time 60fps playback, scene jumping, audio controls, and 1-click video recording/export.
-- ⚡ **Video Generator Script**: Run `python scripts/generate_promo_video.py` anytime to re-render the promo video offline.
+The platform connects to **TMDB (The Movie Database)** with strict regional filters to deliver real-time autocomplete search, comprehensive Korean drama/movie metadata, cast listings, and posters.
 
 ---
 
-## 🖼️ Application Showcase
+## Features
 
-### 1. Home & Cinematic Spotlight
-> Atmospheric spotlight featuring trending releases, dual critic/community ratings, Hangul subtitles, and quick-add watchlist triggers.
+- **Live Autocomplete Search:** Instant as-you-type search powered by TMDB with strict South Korean origin filtering (`ko` / `KR`).
+- **Dynamic Catalog & Auto-Ingest:** Any Korean drama or film searched is pulled with full metadata (cast, episode counts, release dates, and backdrops).
+- **Personal Library & Watch Status:** Track titles across *Watched*, *Watching*, and *Plan to Watch*.
+- **Top 3 Showcase:** Curate your top 3 favorite K-Dramas and K-Movies on your public profile.
+- **Dual Ratings:** Compare official TMDB critic averages alongside genuine Dramify community member reviews.
+- **User Authentication:** JWT-based authentication with bcrypt password hashing and customizable profile avatars.
+
+---
+
+## 🖼️ Application Preview
 
 <div align="center">
-  <img src="./docs/screenshots/home.png" alt="Dramify Home Showcase" width="100%" />
+
+### Home & Spotlight
+<img src="./docs/screenshots/home.png" alt="Dramify Home" width="100%" />
+
+### Discovery Feed
+<img src="./docs/screenshots/discover.png" alt="Dramify Discover" width="100%" />
+
 </div>
 
 ---
 
-### 2. Devotee Profile & Sliding Pill Navigation
-> Personal profile showcasing 148 cataloged Korean titles with a responsive sliding pill navbar to seamlessly toggle between **K-Dramas (81)** and **K-Movies (67)**, accompanied by a dynamic Top 3 podium.
+## Tech Stack
 
-<div align="center">
-  <img src="./docs/screenshots/profile.png" alt="Dramify Profile and Sliding Pill Navbar" width="100%" />
-</div>
+### Frontend
+- **Framework:** React 19 + TypeScript + Vite
+- **Styling:** Tailwind CSS
+- **Routing:** React Router v7
+- **Icons:** Lucide React
 
----
-
-### 3. Curated Korean Catalogue & Discovery
-> Filterable browsing feed segmented by trending series, all-time highest rated, blockbuster films, and critical gems.
-
-<div align="center">
-  <img src="./docs/screenshots/discover.png" alt="Dramify Discover Section" width="100%" />
-</div>
+### Backend & Database
+- **Runtime:** Node.js + Express (TypeScript)
+- **Database:** MongoDB Atlas via Mongoose
+- **Auth:** JSON Web Tokens (JWT) + bcryptjs
+- **External API:** TMDB (The Movie Database) v3 API
 
 ---
 
-## ✨ Core Highlights & Features
-
-### 🎚️ Interactive Sliding Pill View Toggle
-- Effortlessly slide between **📺 K-Dramas** and **🎬 K-Movies** in your profile with a fluid, glowing indicator.
-- Real-time filtered grid featuring custom search by English or Hangul title, and 4-way sorting (*List Order #1–#148, Highest Rated, Release Year, and Alphabetical*).
-
-### 🏆 Dynamic Top 3 Podium
-- Interactive personal podium displaying 🥇 Gold, 🥈 Silver, and 🥉 Bronze favorites.
-- Automatically switches between your highest-rated **K-Dramas** and **K-Movies** when toggling the sliding pill.
-
-### 📚 148 Watched Titles Library
-- Deeply cataloged library of 148 iconic Korean titles (81 dramas and 67 movies) including English names, authentic Hangul typography, release years, and genres.
-- Full tracking states: *Watching*, *Watched*, *Plan to Watch*, and *Favorites*.
-
-### 🖼️ Resilient Fallback Poster System
-- Intelligent image error handling: whenever an external CDN poster is missing or blocked, the card renders an editorial Korean poster with authentic Hangul typography, media category badge, release year, and subtle cinematic patterns.
-- No broken image icons or blank grey placeholders.
-
-### ⭐ Dual Rating Showcase
-- Compare official **TMDB Critic Scores** alongside **Dramify Community Ratings**.
-- Submit personal 1–10 star ratings with written reviews and community reactions.
-
----
-
-## 🏗️ Architecture & Project Structure
-
-The project follows a clean decoupled monorepo architecture:
+## Project Structure
 
 ```
 dramify/
-├── client/                      # Frontend Single Page Application
+├── client/                      # Frontend SPA
 │   ├── src/
-│   │   ├── components/          # Reusable UI components (MediaCard, RatingBadge, Navbar)
-│   │   ├── pages/               # Route views (HomePage, ProfilePage, DiscoverPage, etc.)
-│   │   ├── data/                # 147 watched Korean titles & mock seed data
-│   │   ├── types/               # TypeScript interfaces (Media, User, Reviews)
-│   │   └── services/            # API client service for backend communication
-│   ├── tailwind.config.js       # Obsidian Cinema color palette & animations
-│   └── vite.config.ts           # Vite 8 build configuration
+│   │   ├── components/          # Reusable UI (Navbar, MediaCard, LiveSearchBar, etc.)
+│   │   ├── pages/               # Routes (Home, Discover, Search, Library, MediaDetail, Profile)
+│   │   ├── context/             # AuthContext session state
+│   │   ├── services/            # API client layer (Express + TMDB integration)
+│   │   ├── types/               # TypeScript schemas
+│   │   └── data/                # Seed Korean titles and avatars
+│   └── public/                  # Static assets & brand icons
 │
-├── server/                      # Backend API Server
+├── server/                      # Backend REST API
 │   ├── src/
-│   │   ├── models/              # Mongoose schemas (User, MediaInteraction, Review)
-│   │   ├── routes/              # Express API route controllers (auth, tmdb, interactions)
-│   │   ├── services/            # Secure TMDB Korean proxy service
-│   │   └── middleware/          # JWT authentication middleware
-│   └── tsconfig.json            # Node/TypeScript server compilation
-│
-└── docs/
-    └── screenshots/             # High-resolution application preview captures
+│   │   ├── models/              # Mongoose schemas (User, Interaction, Review, Media)
+│   │   ├── routes/              # Express routers (auth, interactions, reviews, tmdb, profile)
+│   │   ├── services/            # TMDB proxy with Korean origin filters
+│   │   └── middleware/          # JWT authentication guard
+│   └── package.json
 ```
 
 ---
 
-## 🎨 Design Philosophy: *Obsidian Cinema*
+## Getting Started
 
-- **Color Harmony**: Deep OLED background (`#07080B`), Obsidian surface (`#0F1117`), Crimson Rose highlight (`#E11D48`), Amber Star Gold (`#F59E0B`), and Cyan Movie Accent (`#06B6D4`).
-- **Typography**: Modern geometric display type paired with crisp Korean Hangul font rendering.
-- **Double-Bezel Elevation**: Concentric borders with subtle backdrops creating a tactile, cinema-grade feel.
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or pnpm
+- MongoDB connection URI
+- TMDB API Key ([themoviedb.org](https://www.themoviedb.org/settings/api))
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/Vivek-k001/Dramify.git
+cd Dramify
+```
+
+### 2. Configure Environment Variables
+
+**Server (`server/.env`):**
+```env
+PORT=5000
+CLIENT_URL=http://localhost:5173
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+TMDB_API_KEY=your_tmdb_api_key
+```
+
+**Client (`client/.env`):**
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+### 3. Run Locally
+
+**Start the Backend:**
+```bash
+cd server
+npm install
+npm run build
+npm start
+```
+
+**Start the Frontend:**
+```bash
+cd client
+npm install
+npm run dev
+```
+
+The frontend will run on `http://localhost:5173`.
 
 ---
 
-## 📄 License
+## Attribution
 
-This project is open-source and licensed under the [MIT License](LICENSE).
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

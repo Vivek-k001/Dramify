@@ -2,19 +2,17 @@
   <!-- Rounded Crimson Squircle App Tile -->
   <rect width="512" height="512" rx="128" fill="#E50914"/>
   
-  <!-- Outer D Path -->
-  <!-- Crisp white bold geometric D with hollow inner counter -->
+  <!-- Outer D Path - Optically Balanced towards the right (X: 124 to 424 | Y: 104 to 408) -->
   <path 
     fill-rule="evenodd" 
     clip-rule="evenodd" 
-    d="M136 128H280C368.366 128 440 199.634 440 288C440 376.366 368.366 448 280 448H136V128ZM196 188V388H280C335.228 388 380 343.228 380 288C380 232.772 335.228 188 280 188H196Z" 
+    d="M124 104H276C360 104 424 172 424 256C424 340 360 408 276 408H124V104ZM188 168V344H276C324.6 344 364 304.6 364 256C364 207.4 324.6 168 276 168H188Z" 
     fill="#FFFFFF"
   />
   
-  <!-- Centered Forward Play Triangle Emblem -->
+  <!-- Centered Play Triangle inside the D cavity (Cavity is X:188 to 364, Midpoint: 276. Triangle X:248 to 318) -->
   <polygon 
-    points="244,228 328,288 244,348" 
+    points="248,206 318,256 248,306" 
     fill="#FFFFFF"
   />
 </svg>
-
