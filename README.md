@@ -88,59 +88,6 @@ dramify/
 │   └── package.json
 ```
 
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or pnpm
-- MongoDB connection URI
-- TMDB API Key ([themoviedb.org](https://www.themoviedb.org/settings/api))
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/Vivek-k001/Dramify.git
-cd Dramify
-```
-
-### 2. Configure Environment Variables
-
-**Server (`server/.env`):**
-```env
-PORT=5000
-CLIENT_URL=http://localhost:5173
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-TMDB_API_KEY=your_tmdb_api_key
-```
-
-**Client (`client/.env`):**
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-### 3. Run Locally
-
-**Start the Backend:**
-```bash
-cd server
-npm install
-npm run build
-npm start
-```
-
-**Start the Frontend:**
-```bash
-cd client
-npm install
-npm run dev
-```
-
-The frontend will run on `http://localhost:5173`.
-
----
-
 ## Attribution
 
 This product uses the TMDB API but is not endorsed or certified by TMDB.
