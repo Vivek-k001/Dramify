@@ -65,28 +65,6 @@ The platform connects to **TMDB (The Movie Database)** with strict regional filt
 
 ---
 
-## Project Structure
-
-```
-dramify/
-├── client/                      # Frontend SPA
-│   ├── src/
-│   │   ├── components/          # Reusable UI (Navbar, MediaCard, LiveSearchBar, etc.)
-│   │   ├── pages/               # Routes (Home, Discover, Search, Library, MediaDetail, Profile)
-│   │   ├── context/             # AuthContext session state
-│   │   ├── services/            # API client layer (Express + TMDB integration)
-│   │   ├── types/               # TypeScript schemas
-│   │   └── data/                # Seed Korean titles and avatars
-│   └── public/                  # Static assets & brand icons
-│
-├── server/                      # Backend REST API
-│   ├── src/
-│   │   ├── models/              # Mongoose schemas (User, Interaction, Review, Media)
-│   │   ├── routes/              # Express routers (auth, interactions, reviews, tmdb, profile)
-│   │   ├── services/            # TMDB proxy with Korean origin filters
-│   │   └── middleware/          # JWT authentication guard
-│   └── package.json
-```
 
 ## Attribution
 
