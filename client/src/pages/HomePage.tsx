@@ -7,7 +7,6 @@ import { MediaCard } from '../components/MediaCard';
 import { RatingBadge } from '../components/RatingBadge';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { WatchStatusButton } from '../components/WatchStatusButton';
-import { CinematicPoster } from '../components/CinematicPoster';
 import { LiveSearchBar } from '../components/LiveSearchBar';
 
 // Fisher-Yates array randomizer
@@ -33,14 +32,15 @@ export const HomePage: React.FC = () => {
     return shuffleArray(allMovies).slice(0, 5);
   });
 
-  // Dynamic featured spotlight selected from top-rated dramas (>= 8.9)
+  // Dynamic featured spotlight selected from top-rated Korean dramas (TMDB score >= 8.0)
   const [featuredMedia] = useState<MediaItem>(() => {
-    const topDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv' && m.dramify_community_rating >= 8.9);
+    const topDramas = MOCK_MEDIA.filter((m) => m.media_type === 'tv' && m.vote_average >= 8.0);
     return topDramas[Math.floor(Math.random() * topDramas.length)] || MOCK_MEDIA[0];
   });
 
+  // Top-rated community & critic favorites sorted by authentic TMDB rating
   const communityFavorites = [...MOCK_MEDIA]
-    .sort((a, b) => b.dramify_community_rating - a.dramify_community_rating)
+    .sort((a, b) => b.vote_average - a.vote_average)
     .slice(0, 4);
 
   const genres = [
@@ -85,7 +85,7 @@ export const HomePage: React.FC = () => {
 
               {/* Live Autocomplete Search Bar */}
               <div className="max-w-xl">
-                <LiveSearchBar placeholder="Search any K-Drama or Movie (Vincenzo, Twinkling Watermelon, etc.)..." />
+                <LiveSearchBar placeholder="Search K-Dramas, movies, cast, genres..." />
               </div>
 
               {/* Quick Genre Pills */}
@@ -104,34 +104,38 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Right Column: Featured Spotlight Card */}
-            <div className="lg:col-span-5">
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#141620] shadow-2xl group">
+            <div className="lg:col-span-5 flex justify-center lg:justify-end">
+              <div className="relative rounded-2xl border border-white/10 bg-[#141620] shadow-2xl group max-w-sm sm:max-w-md w-full">
                 {/* Poster / Backdrop Banner */}
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
-                  <CinematicPoster
-                    title={featuredMedia.title}
-                    koreanTitle={featuredMedia.korean_title}
-                    releaseYear={featuredMedia.release_year}
-                    mediaType={featuredMedia.media_type}
-                    primaryUrl={featuredMedia.backdrop_path || featuredMedia.poster_path}
-                    aspectRatio="backdrop"
-                    className="w-full h-full"
+                <div className="relative h-64 sm:h-72 w-full overflow-hidden rounded-t-2xl bg-slate-950 flex items-center justify-center">
+                  {/* Subtle blurred background poster to fill empty sides */}
+                  <img
+                    src={featuredMedia.backdrop_path || featuredMedia.poster_path}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-35 scale-110 pointer-events-none"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#141620] via-transparent to-black/30 pointer-events-none" />
+                  {/* Main poster cleanly displayed without cutting off faces/heads */}
+                  <img
+                    src={featuredMedia.backdrop_path || featuredMedia.poster_path}
+                    alt={featuredMedia.title}
+                    className="relative z-10 max-h-full max-w-full object-contain mx-auto drop-shadow-xl"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#141620] via-transparent to-black/30 pointer-events-none z-10" />
 
                   {/* Spotlight Badge */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-crimson text-white text-[10px] font-bold shadow-md">
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-crimson text-white text-[10px] font-bold shadow-md z-20">
                     <Flame size={12} />
                     <span>FEATURED SPOTLIGHT</span>
                   </div>
 
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 z-20">
                     <FavoriteButton size="sm" />
                   </div>
                 </div>
 
                 {/* Spotlight Info */}
-                <div className="p-5 space-y-3">
+                <div className="p-4 sm:p-5 space-y-2.5 relative z-20">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-hangul text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 font-medium">
@@ -162,9 +166,9 @@ export const HomePage: React.FC = () => {
                     <WatchStatusButton size="sm" />
                     <Link
                       to={`/media/${featuredMedia.media_type}/${featuredMedia.tmdb_id}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors group/link"
                     >
-                      <Play size={12} className="fill-current" />
+                      <Play size={12} className="fill-current text-rose-400 group-hover/link:translate-x-0.5 transition-transform" />
                       <span>Details & Cast</span>
                     </Link>
                   </div>

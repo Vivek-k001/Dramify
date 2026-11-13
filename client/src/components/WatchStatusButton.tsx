@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Bookmark, Eye, Check, ChevronDown } from 'lucide-react';
 import { WatchStatus } from '../types/media';
+import { useAuth } from '../context/AuthContext';
+import { AuthPromptModal } from './AuthPromptModal';
 import { cn } from '../utils/cn';
 
 interface WatchStatusButtonProps {
@@ -8,6 +10,7 @@ interface WatchStatusButtonProps {
   onStatusChange?: (status: WatchStatus | null) => void;
   className?: string;
   size?: 'sm' | 'md';
+  placement?: 'bottom' | 'top' | 'auto';
 }
 
 export const WatchStatusButton: React.FC<WatchStatusButtonProps> = ({
@@ -15,9 +18,25 @@ export const WatchStatusButton: React.FC<WatchStatusButtonProps> = ({
   onStatusChange,
   className,
   size = 'md',
+  placement = 'auto',
 }) => {
+  const { isAuthenticated } = useAuth();
   const [status, setStatus] = useState<WatchStatus | null>(initialStatus);
   const [isOpen, setIsOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const statusOptions: Array<{ id: WatchStatus; label: string; icon: React.ReactNode; color: string }> = [
     { id: 'plan_to_watch', label: 'Plan to Watch', icon: <Bookmark size={14} />, color: 'text-sky-400' },
@@ -28,6 +47,11 @@ export const WatchStatusButton: React.FC<WatchStatusButtonProps> = ({
   const handleSelect = (selectedStatus: WatchStatus | null, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      setIsOpen(false);
+      setShowAuthModal(true);
+      return;
+    }
     const newStatus = status === selectedStatus ? null : selectedStatus;
     setStatus(newStatus);
     setIsOpen(false);
@@ -37,12 +61,16 @@ export const WatchStatusButton: React.FC<WatchStatusButtonProps> = ({
   const currentOption = statusOptions.find((opt) => opt.id === status);
 
   return (
-    <div className={cn('relative inline-block text-left', className)}>
+    <div ref={containerRef} className={cn('relative inline-block text-left', className)}>
       <button
         type="button"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (!isAuthenticated) {
+            setShowAuthModal(true);
+            return;
+          }
           setIsOpen(!isOpen);
         }}
         className={cn(
@@ -70,7 +98,12 @@ export const WatchStatusButton: React.FC<WatchStatusButtonProps> = ({
       {isOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute right-0 mt-1.5 w-44 rounded-2xl bg-dramify-surface/95 backdrop-blur-xl border border-white/15 shadow-2xl z-30 py-1.5 animate-scale-in"
+          className={cn(
+            'absolute right-0 w-44 rounded-2xl bg-[#141620]/95 backdrop-blur-xl border border-white/15 shadow-2xl z-50 py-1.5 animate-scale-in',
+            placement === 'top' || placement === 'auto'
+              ? 'bottom-full mb-2 origin-bottom-right'
+              : 'top-full mt-2 origin-top-right'
+          )}
         >
           <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold border-b border-white/5 mb-1">
             Tracking Status
@@ -107,6 +140,14 @@ export const WatchStatusButton: React.FC<WatchStatusButtonProps> = ({
           )}
         </div>
       )}
+
+      {/* Sign-in prompt modal when unauthenticated visitor attempts to track */}
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        title="Sign In to Track"
+        description="Do you want to sign in? You need an account to track your watch status, create custom lists, and curate your personal Korean drama library."
+      />
     </div>
   );
 };

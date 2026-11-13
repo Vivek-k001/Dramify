@@ -15,12 +15,12 @@ import {
   LogOut
 } from 'lucide-react';
 import { MOCK_USER_PROFILE, MOCK_MEDIA } from '../data/mockMedia';
-import { USER_WATCHED_TITLES } from '../data/userWatchedList';
 import { MediaCard } from '../components/MediaCard';
 import { ProfileAvatarPicker } from '../components/ProfileAvatarPicker';
 import { getSavedAvatar, saveAvatar, ProfileAvatar } from '../data/avatars';
 import { useAuth } from '../context/AuthContext';
-import { profileApi } from '../services/api';
+import { profileApi, interactionApi } from '../services/api';
+import { MediaItem } from '../types/media';
 import { cn } from '../utils/cn';
 
 type MediaSlideType = 'tv' | 'movie';
@@ -83,6 +83,79 @@ export const ProfilePage: React.FC = () => {
   const isCurator = username?.toLowerCase() === 'vivek';
   const isSelf = (!username && !!currentUser) || (!!username && !!currentUser && currentUser.username.toLowerCase() === username.toLowerCase());
 
+  // User's real tracked items from MongoDB
+  const [userTrackedItems, setUserTrackedItems] = useState<MediaItem[]>([]);
+  const [userTopDramas, setUserTopDramas] = useState<MediaItem[]>([]);
+  const [userTopMovies, setUserTopMovies] = useState<MediaItem[]>([]);
+  const [stats, setStats] = useState({
+    watched: 0,
+    favorites: 0,
+    watching: 0,
+    planToWatch: 0,
+    avgRating: 0,
+  });
+
+  // Fetch real profile data for registered users
+  useEffect(() => {
+    if (isCurator) {
+      setUserTrackedItems(MOCK_MEDIA);
+      setUserTopDramas(MOCK_USER_PROFILE.topThreeDramas);
+      setUserTopMovies(MOCK_USER_PROFILE.topThreeMovies);
+      setStats(MOCK_USER_PROFILE.stats);
+      return;
+    }
+
+    if (isSelf && currentUser) {
+      interactionApi
+        .getLibrary()
+        .then((items) => {
+          if (Array.isArray(items)) {
+            const mapped: MediaItem[] = items.map((item: any) => {
+              const catalogMatch = MOCK_MEDIA.find((m) => m.tmdb_id === item.tmdbId);
+              return catalogMatch || ({
+                id: item.tmdbId,
+                tmdb_id: item.tmdbId,
+                title: item.title,
+                original_title: item.title,
+                korean_title: item.koreanTitle || item.title,
+                overview: '',
+                poster_path: item.posterPath || '',
+                backdrop_path: item.posterPath || '',
+                media_type: item.mediaType || 'tv',
+                release_date: `${item.releaseYear || 2024}-01-01`,
+                release_year: item.releaseYear || 2024,
+                vote_average: item.rating || 0,
+                vote_count: 1,
+                dramify_community_rating: item.rating || 0,
+                dramify_ratings_count: item.rating ? 1 : 0,
+                genres: [],
+                status: 'Released',
+                cast: [],
+              } as MediaItem);
+            });
+
+            setUserTrackedItems(mapped);
+
+            const watchedCount = items.filter((i: any) => i.status === 'watched').length;
+            const watchingCount = items.filter((i: any) => i.status === 'watching').length;
+            const planCount = items.filter((i: any) => i.status === 'plan_to_watch').length;
+            const favCount = items.filter((i: any) => i.isFavorite).length;
+            const rated = items.filter((i: any) => i.rating);
+            const avg = rated.length > 0 ? Number((rated.reduce((acc: number, c: any) => acc + c.rating, 0) / rated.length).toFixed(1)) : 0;
+
+            setStats({
+              watched: watchedCount,
+              watching: watchingCount,
+              planToWatch: planCount,
+              favorites: favCount,
+              avgRating: avg,
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isCurator, isSelf, currentUser]);
+
   const profile = useMemo(() => {
     if (isCurator) {
       return MOCK_USER_PROFILE;
@@ -94,15 +167,9 @@ export const ProfilePage: React.FC = () => {
         avatarUrl: currentUser.avatarUrl || getSavedAvatar(),
         bio: currentUser.bio || 'Hallyu enthusiast tracking Korean dramas and films on Dramify.',
         joinDate: 'Joined recently',
-        stats: {
-          watched: USER_WATCHED_TITLES.length,
-          favorites: 18,
-          watching: 3,
-          planToWatch: 12,
-          avgRating: 9.1,
-        },
-        topThreeDramas: MOCK_USER_PROFILE.topThreeDramas,
-        topThreeMovies: MOCK_USER_PROFILE.topThreeMovies,
+        stats: stats,
+        topThreeDramas: userTopDramas,
+        topThreeMovies: userTopMovies,
       };
     }
     // Viewing another user
@@ -112,17 +179,11 @@ export const ProfilePage: React.FC = () => {
       avatarUrl: getSavedAvatar(),
       bio: 'Drama fan on Dramify.',
       joinDate: '2024',
-      stats: {
-        watched: 24,
-        favorites: 8,
-        watching: 2,
-        planToWatch: 10,
-        avgRating: 8.8,
-      },
-      topThreeDramas: MOCK_USER_PROFILE.topThreeDramas,
-      topThreeMovies: MOCK_USER_PROFILE.topThreeMovies,
+      stats: stats,
+      topThreeDramas: userTopDramas,
+      topThreeMovies: userTopMovies,
     };
-  }, [isCurator, isSelf, currentUser, username]);
+  }, [isCurator, isSelf, currentUser, username, stats, userTopDramas, userTopMovies]);
 
   const [avatarUrl, setAvatarUrl] = useState<string>(() => profile.avatarUrl || getSavedAvatar());
 
@@ -131,7 +192,7 @@ export const ProfilePage: React.FC = () => {
   }, [profile.avatarUrl]);
 
   // Split titles into Dramas and Movies
-  const allWatchedTitles = MOCK_MEDIA;
+  const allWatchedTitles = isCurator ? MOCK_MEDIA : userTrackedItems;
   const kdramas = useMemo(() => allWatchedTitles.filter((m) => m.media_type === 'tv'), [allWatchedTitles]);
   const kmovies = useMemo(() => allWatchedTitles.filter((m) => m.media_type === 'movie'), [allWatchedTitles]);
 
@@ -148,7 +209,7 @@ export const ProfilePage: React.FC = () => {
         (m) =>
           m.title.toLowerCase().includes(q) ||
           m.korean_title.includes(q) ||
-          m.genres.some((g) => g.toLowerCase().includes(q))
+          m.genres && Array.isArray(m.genres) && m.genres.some((g: string) => g.toLowerCase().includes(q))
       );
     }
 
@@ -370,7 +431,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. DYNAMIC TOP 3 PODIUM (Updates dynamically with Sliding Pill!) */}
+      {/* 4. DYNAMIC TOP 3 PODIUM */}
       <section className="space-y-4 pt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -382,24 +443,36 @@ export const ProfilePage: React.FC = () => {
           <span className="text-xs text-slate-400">Top 3 Favorites</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {(slideType === 'tv' ? profile.topThreeDramas : profile.topThreeMovies).map((item, idx) => {
-            const picks = ['1st Pick', '2nd Pick', '3rd Pick'];
-            const badgeColors = [
-              'bg-crimson/15 border-crimson/40 text-red-200',
-              'bg-white/10 border-white/20 text-slate-200',
-              'bg-white/5 border-white/10 text-slate-300',
-            ];
-            return (
-              <div key={item.id} className="space-y-2">
-                <div className={`px-3 py-1.5 rounded-full text-xs font-bold text-center border tracking-wide ${badgeColors[idx]}`}>
-                  {picks[idx]}
+        {((slideType === 'tv' ? profile.topThreeDramas : profile.topThreeMovies).length > 0) ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {(slideType === 'tv' ? profile.topThreeDramas : profile.topThreeMovies).map((item, idx) => {
+              const picks = ['1st Pick', '2nd Pick', '3rd Pick'];
+              const badgeColors = [
+                'bg-crimson/15 border-crimson/40 text-red-200',
+                'bg-white/10 border-white/20 text-slate-200',
+                'bg-white/5 border-white/10 text-slate-300',
+              ];
+              return (
+                <div key={item.id} className="space-y-2">
+                  <div className={`px-3 py-1.5 rounded-full text-xs font-bold text-center border tracking-wide ${badgeColors[idx]}`}>
+                    {picks[idx]}
+                  </div>
+                  <MediaCard media={item} rank={idx + 1} />
                 </div>
-                <MediaCard media={item} rank={idx + 1} />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 rounded-2xl bg-[#12141B] border border-white/5 text-center space-y-2">
+            <Trophy size={28} className="mx-auto text-slate-600 mb-1" />
+            <p className="text-sm font-semibold text-white">No Top 3 {slideType === 'tv' ? 'Dramas' : 'Movies'} Selected Yet</p>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              {isSelf
+                ? 'Rate or favorite your top Korean releases to curate your personal podium.'
+                : 'This user has not curated their podium yet.'}
+            </p>
+          </div>
+        )}
       </section>
 
       {/* 5. WATCHED COLLECTION SECTION */}
@@ -421,47 +494,71 @@ export const ProfilePage: React.FC = () => {
               )}
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Every title catalogued and verified in your Dramify library
+              {isCurator ? 'Curator verified collection' : 'Personal tracked titles in your Dramify library'}
             </p>
           </div>
 
           {/* Controls: Search and Sort */}
-          <div className="flex items-center gap-2.5 flex-wrap">
-            {/* Search within collection */}
-            <div className="relative w-full sm:w-60">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${slideType === 'tv' ? 'dramas' : 'movies'}...`}
-                className="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#141620] border border-white/10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-crimson"
-              />
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            </div>
+          {activeList.length > 0 && (
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* Search within collection */}
+              <div className="relative w-full sm:w-60">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={`Search ${slideType === 'tv' ? 'dramas' : 'movies'}...`}
+                  className="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#141620] border border-white/10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-crimson"
+                />
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              </div>
 
-            {/* Sort */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs text-slate-300">
-              <SlidersHorizontal size={12} className="text-slate-400" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-xs text-slate-200 focus:outline-none"
+              {/* Sort */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 border border-white/10 text-xs text-slate-300">
+                <SlidersHorizontal size={12} className="text-slate-400" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-transparent text-xs text-slate-200 focus:outline-none"
+                >
+                  <option value="default" className="bg-slate-900">List Order</option>
+                  <option value="rating" className="bg-slate-900">Highest Rated</option>
+                  <option value="year" className="bg-slate-900">Release Year</option>
+                  <option value="title" className="bg-slate-900">Alphabetical</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Media Grid or Clean Empty State */}
+        {filteredCollection.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            {filteredCollection.map((media) => (
+              <MediaCard key={media.id} media={media} rank={media.id} />
+            ))}
+          </div>
+        ) : (
+          <div className="p-12 rounded-3xl bg-[#101217] border border-white/5 text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto text-slate-400">
+              {slideType === 'tv' ? <Tv size={22} /> : <Film size={22} />}
+            </div>
+            <h3 className="font-display font-bold text-base text-white">
+              No {slideType === 'tv' ? 'K-Dramas' : 'K-Movies'} Tracked Yet
+            </h3>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              Search any title using the top search bar and click &ldquo;+ Watched&rdquo; to add it to your profile.
+            </p>
+            <div className="pt-2">
+              <Link
+                to="/discover"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-crimson hover:bg-crimsonHover text-white text-xs font-semibold shadow-lg shadow-crimson/20 transition-all"
               >
-                <option value="default" className="bg-slate-900">List Order</option>
-                <option value="rating" className="bg-slate-900">Highest Rated</option>
-                <option value="year" className="bg-slate-900">Release Year</option>
-                <option value="title" className="bg-slate-900">Alphabetical</option>
-              </select>
+                Explore Discover Feed &rarr;
+              </Link>
             </div>
           </div>
-        </div>
-
-        {/* Media Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-          {filteredCollection.map((media) => (
-            <MediaCard key={media.id} media={media} rank={media.id} />
-          ))}
-        </div>
+        )}
       </section>
 
       {/* 6. MODAL AVATAR PICKER */}

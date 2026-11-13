@@ -86,7 +86,7 @@ export const MediaCard: React.FC<MediaCardProps> = ({
       </Link>
 
       {/* Content Details */}
-      <div className="p-3 sm:p-3.5 flex flex-col flex-grow justify-between gap-2.5 bg-[#12141B]">
+      <div className="p-3 sm:p-3.5 flex flex-col flex-grow justify-between gap-2.5 bg-[#12141B] relative z-20">
         <div>
           {/* Title */}
           <Link

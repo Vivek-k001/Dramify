@@ -25,7 +25,7 @@ interface SearchResultItem {
 }
 
 export const LiveSearchBar: React.FC<LiveSearchBarProps> = ({
-  placeholder = 'Search by title (Vincenzo, 반짝이는 워터멜론), cast or genre...',
+  placeholder = 'Search K-Dramas, movies, cast, genres...',
   className = '',
   autoFocus = false,
   onSelect,

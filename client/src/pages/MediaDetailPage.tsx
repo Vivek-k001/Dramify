@@ -13,7 +13,7 @@ import {
   Check,
   MessageSquare
 } from 'lucide-react';
-import { MOCK_MEDIA, MOCK_REVIEWS } from '../data/mockMedia';
+import { MOCK_MEDIA } from '../data/mockMedia';
 import { WatchStatus, Review, MediaItem } from '../types/media';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { EmptyState } from '../components/EmptyState';
@@ -108,10 +108,35 @@ export const MediaDetailPage: React.FC = () => {
   const [userStatus, setUserStatus] = useState<WatchStatus | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Reviews for this media
-  const [mediaReviews, setMediaReviews] = useState<Review[]>(() =>
-    MOCK_REVIEWS.filter((r) => r.tmdb_id === media.tmdb_id)
-  );
+  // Real reviews fetched from server backend
+  const [mediaReviews, setMediaReviews] = useState<Review[]>([]);
+
+  // Fetch real reviews for this media
+  useEffect(() => {
+    if (media?.tmdb_id) {
+      reviewApi
+        .getReviews(media.media_type, media.tmdb_id)
+        .then((res) => {
+          if (res?.reviews && Array.isArray(res.reviews)) {
+            const mapped: Review[] = res.reviews.map((r: any) => ({
+              id: r._id || r.id,
+              userId: r.userId?._id || r.userId || 'u-unknown',
+              username: r.userId?.username || 'user',
+              displayName: r.userId?.displayName || r.userId?.username || 'Anonymous',
+              avatarUrl: r.userId?.avatarUrl || getSavedAvatar(),
+              tmdb_id: media.tmdb_id,
+              media_type: media.media_type,
+              rating: r.rating,
+              content: r.content,
+              createdAt: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'Recently',
+              likesCount: r.likesCount || 0,
+            }));
+            setMediaReviews(mapped);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [media?.tmdb_id, media?.media_type]);
 
   // Review Form state
   const [newReviewText, setNewReviewText] = useState('');

@@ -1,62 +1,23 @@
 import { MediaItem, Review, UserProfile } from '../types/media';
 import { USER_WATCHED_TITLES } from './userWatchedList';
 
-// Core Featured & Trending Media combined with User's 147 watched titles
+// Core Catalog: 148 curated Korean titles (dramas and movies)
 export const MOCK_MEDIA: MediaItem[] = [
   ...USER_WATCHED_TITLES,
 ];
 
-export const MOCK_REVIEWS: Review[] = [
-  {
-    id: 'rev-1',
-    userId: 'u-1',
-    username: 'jieun_park',
-    displayName: 'Ji-eun Park',
-    avatarUrl: '/avatars/avatar-3.jpg',
-    tmdb_id: 66897, // Uncontrollably Fond
-    media_type: 'tv',
-    rating: 10,
-    content: 'Uncontrollably Fond broke my heart into a million pieces. Kim Woo-bin and Suzy delivered career-defining performances. That winter seaside scene remains unforgettable.',
-    createdAt: '3 days ago',
-    likesCount: 156,
-  },
-  {
-    id: 'rev-2',
-    userId: 'u-2',
-    username: 'alex_cinema',
-    displayName: 'Alex Thorne',
-    avatarUrl: '/avatars/avatar-5.jpg',
-    tmdb_id: 670, // Oldboy
-    media_type: 'movie',
-    rating: 10,
-    content: 'The undisputed crowning achievement of Korean cinema. Park Chan-wook’s single-shot hallway brawl and the devastating third act twist set a global benchmark.',
-    createdAt: '1 week ago',
-    likesCount: 284,
-  },
-  {
-    id: 'rev-3',
-    userId: 'u-3',
-    username: 'minho_action',
-    displayName: 'Min-ho Song',
-    avatarUrl: '/avatars/avatar-6.jpg',
-    tmdb_id: 205120, // Weak Hero Class 1
-    media_type: 'tv',
-    rating: 10,
-    content: 'The emotional intensity and raw fight choreography in Weak Hero Class 1 is second to none. Park Ji-hoon’s gaze in the finale is absolute perfection.',
-    createdAt: '2 weeks ago',
-    likesCount: 198,
-  },
-];
+// No fake dummy reviews - real reviews come directly from users via MongoDB
+export const MOCK_REVIEWS: Review[] = [];
 
-// User Profile showcasing the 148 Watched Titles
+// Official Curator Profile (Vivek's personal showcase at /u/vivek)
 export const MOCK_USER_PROFILE: UserProfile = {
   username: 'vivek',
   displayName: 'Vivek',
   avatarUrl: '/avatars/avatar-1.jpg',
-  bio: 'True Hallyu devotee. 148 Korean titles tracked across KBS weekend family gems, adrenaline noir thrillers, and box office cinema. Big Mouth, Jirisan & Bloodhounds enthusiast.',
+  bio: 'Platform curator. 148 Korean titles tracked across KBS weekend family gems, adrenaline noir thrillers, and box office cinema.',
   joinDate: 'January 2024',
   stats: {
-    watched: USER_WATCHED_TITLES.length, // Exactly 148!
+    watched: USER_WATCHED_TITLES.length,
     favorites: 32,
     watching: 4,
     planToWatch: 18,
